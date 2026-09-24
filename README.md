@@ -42,3 +42,12 @@ Files are saved as `Title [VIDEO_ID].ext`. Videos without captions are reported 
 
 **Note:** YouTube rate-limits and sometimes blocks cloud/datacenter IPs. Run this from a home
 connection, or add delays and fewer videos per run if you start seeing errors.
+
+## Run it in the cloud (GitHub Actions)
+
+1. Go to the repo's **Actions** tab, then **Get transcripts**, then **Run workflow**.
+2. Paste one or more URLs, choose the options, and run it.
+3. When it finishes, download the `transcripts` zip from the run page.
+
+If YouTube blocks GitHub's servers, you'll see "IP blocked" or "RequestBlocked" errors. To get around it, add a
+repository secret named `YT_PROXY` with a proxy URL (`http://user:pass@host:port`). A residential proxy works best.

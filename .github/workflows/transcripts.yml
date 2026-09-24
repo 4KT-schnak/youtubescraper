@@ -1,0 +1,53 @@
+name: Get transcripts
+
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: "Video, playlist, or channel URLs (space-separated)"
+        required: true
+      limit:
+        description: "Max videos per channel/playlist (blank = all)"
+        required: false
+      format:
+        description: "Output format"
+        type: choice
+        options: [txt, srt, json]
+        default: txt
+      lang:
+        description: "Preferred language code"
+        default: en
+      timestamps:
+        description: "Include timestamps (txt only)"
+        type: boolean
+        default: false
+
+jobs:
+  transcripts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Fetch transcripts
+        env:
+          URLS: ${{ inputs.urls }}
+          LIMIT: ${{ inputs.limit }}
+          FORMAT: ${{ inputs.format }}
+          LANG_CODE: ${{ inputs.lang }}
+          TIMESTAMPS: ${{ inputs.timestamps }}
+          # Optional: set a YT_PROXY repo secret (e.g. residential proxy URL) if YouTube blocks the runner.
+          HTTPS_PROXY: ${{ secrets.YT_PROXY }}
+        run: |
+          args=(-o transcripts -f "$FORMAT" -l "$LANG_CODE" --combine)
+          [ -n "$LIMIT" ] && args+=(-n "$LIMIT")
+          [ "$TIMESTAMPS" = "true" ] && args+=(-t)
+          read -ra url_list <<< "$URLS"
+          python -m yt_transcripts "${url_list[@]}" "${args[@]}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: transcripts
+          path: transcripts/
+          if-no-files-found: warn
