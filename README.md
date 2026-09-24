@@ -34,6 +34,7 @@ python -m yt_transcripts "https://www.youtube.com/playlist?list=PL..." -f srt -l
 | `-f txt\|srt\|json` | Output format (default `txt`) |
 | `-l CODE` | Preferred language(s), in order (default `en`) |
 | `-n N` | Max videos per channel/playlist |
+| `--min-minutes M` | Only videos at least M minutes long |
 | `-t` | Add `[hh:mm:ss]` timestamps to txt output |
 | `--combine` | Also write every transcript into a single `_combined` file |
 | `--overwrite` | Fetch again even if the file already exists (by default existing files are skipped, so you can re-run it to resume) |

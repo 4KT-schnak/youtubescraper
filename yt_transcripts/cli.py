@@ -36,9 +36,9 @@ def expand(url: str, limit: int | None) -> list[dict]:
     out = []
     for e in entries:
         if e.get("entries"):  # nested tab
-            out.extend({"id": x["id"], "title": x.get("title")} for x in e["entries"] if x.get("id"))
+            out.extend({"id": x["id"], "title": x.get("title"), "duration": x.get("duration")} for x in e["entries"] if x.get("id"))
         elif e.get("id"):
-            out.append({"id": e["id"], "title": e.get("title")})
+            out.append({"id": e["id"], "title": e.get("title"), "duration": e.get("duration")})
     return out[:limit] if limit else out
 
 
@@ -77,6 +77,7 @@ def main(argv=None) -> None:
     p.add_argument("-f", "--format", choices=["txt", "srt", "json"], default="txt")
     p.add_argument("-l", "--lang", action="append", help="preferred language code(s), e.g. -l en -l es")
     p.add_argument("-n", "--limit", type=int, help="max videos per channel/playlist")
+    p.add_argument("--min-minutes", type=float, help="only videos at least this long (channels/playlists)")
     p.add_argument("-t", "--timestamps", action="store_true", help="include timestamps in txt output")
     p.add_argument("--combine", action="store_true", help="also write all transcripts into one file")
     p.add_argument("--overwrite", action="store_true", help="re-fetch transcripts that already exist")
@@ -95,6 +96,8 @@ def main(argv=None) -> None:
         except Exception as e:
             print(f"! could not read {url}: {e}", file=sys.stderr)
             continue
+        if args.min_minutes:
+            videos = [v for v in videos if v.get("duration") is None or v["duration"] >= args.min_minutes * 60]
         print(f"{url}: {len(videos)} video(s)")
         for v in videos:
             name = f"{safe_name(v['title'])} [{v['id']}]" if v["title"] else v["id"]
